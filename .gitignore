@@ -1,0 +1,19 @@
+# 构建文件
+.venv
+__pycache__
+*.pyc
+build
+buildsql
+dist
+upx*
+main.dist
+main.onefile-build
+main.build
+
+# 调试文件
+*.yaml
+/log
+/*.log
+~*
+test*
+*.bak

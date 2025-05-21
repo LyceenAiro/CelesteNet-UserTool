@@ -1,0 +1,4 @@
+# python 3.13
+msgpack==1.1.0
+pyyaml==6.0.2
+Pillow==11.2.1
