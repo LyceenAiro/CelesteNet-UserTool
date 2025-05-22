@@ -1,4 +1,5 @@
 import os
+import shutil
 import yaml
 from PIL import Image
 from SqliteModule import SqliteUserData
@@ -18,7 +19,6 @@ def ReGetKey(uid: str):
     print(f"用户: {uid}\n绑定密钥: {resultKey}")
 
 # 初始化/修改用户的实例
-# 不进行此操作无法登录
 def InsertBasicInfo(uid: str):
     config_path = f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml"
     with open(config_path, "rb") as f:
@@ -103,6 +103,40 @@ def DeOP(uid: str) -> bool:
 # 完全注销用户
 def RemoveUser(uid: str) -> bool:
     try:
-        sql.Wipe(uid)
+        if not sql.Wipe(uid):
+            return False
+        shutil.rmtree(f"{UserDataPath}/User/{uid}")
+    except FileNotFoundError:
+        pass
+    except PermissionError:
+        print(f"删除用户缓存时发生错误: 权限不足")
     except Exception as e:
-        print(f"用户注销失败: {e}")
+        print(f"删除用户缓存时发生错误: {e}")
+    return True
+
+# 查询用户信息
+def GetUserInfo(index: str) -> dict:
+    result_dict = {
+        "uid": None,
+        "key": None,
+        "name": None,
+        "Avatar": False,
+        "Admin": False
+    }
+    if len(index) == 16 and all(i in '0123456789abcdefABCDEF' for i in index):
+        result_dict["key"] = index
+        result_dict["uid"] = sql.GetUID(index)
+    else:
+        result_dict["uid"] = index
+        result_dict["key"] = sql.GetKey(index)
+    if result_dict["uid"] == "" or result_dict["key"] == "":
+        print("未匹配到该用户的信息")
+        return None
+    with open(f"{UserDataPath}/User/{result_dict['uid']}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+    result_dict["name"] = data["Name"]
+    if "admin" in data["Tags"]:
+        result_dict["Admin"] = True
+    if os.path.exists(os.path.join(f"{UserDataPath}/User/{result_dict['uid']}", "avatar.png")):
+        result_dict["Avatar"] = True
+    return result_dict

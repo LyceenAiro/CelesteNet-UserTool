@@ -181,13 +181,18 @@ class SqliteUserData:
     
     def Wipe(self, uid: str) -> None:
         """完全删除UID的所有数据"""
-        with self.Open() as conn:
-            for table in self.GetAllTables():
-                try:
-                    conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
-                except sqlite3.OperationalError:
-                    continue
-            conn.commit()
+        try:
+            with self.Open() as conn:
+                for table in self.GetAllTables():
+                    try:
+                        conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
+                    except sqlite3.OperationalError:
+                        continue
+                conn.commit()
+            return True
+        except Exception as e:
+            print(f"用户注销失败: {e}")
+            return False
     
     def Create(self, uid: str, force_new_key: bool = False) -> str:
         """创建用户&Yaml或获取现有密钥"""
