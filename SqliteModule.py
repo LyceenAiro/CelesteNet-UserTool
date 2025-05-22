@@ -183,7 +183,10 @@ class SqliteUserData:
         """完全删除UID的所有数据"""
         with self.Open() as conn:
             for table in self.GetAllTables():
-                conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
+                try:
+                    conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
+                except sqlite3.OperationalError:
+                    continue
             conn.commit()
     
     def Create(self, uid: str, force_new_key: bool = False) -> str:
@@ -289,16 +292,6 @@ class SqliteUserData:
             if not row:
                 return None
             return BytesIO(row[0])
-
-    def has_file(self, uid, name):
-        """检查文件是否存在"""
-        table = self.GetFileTable(name, create=False)
-        with self.Open() as conn:
-            cursor = conn.cursor()
-            cursor.execute(f"""
-                SELECT 1 FROM {table} WHERE uid = ? LIMIT 1
-            """, (uid,))
-            return cursor.fetchone() is not None
 
 class BatchContext:
     def __init__(self, user_data: SqliteUserData):

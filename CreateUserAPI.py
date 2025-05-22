@@ -25,7 +25,7 @@ def InsertBasicInfo(uid: str):
         sql.insert_data(uid=uid, name="BasicUserInfo", data_type=None, stream=f)
 
 # 初始化/修改用户的头像
-def InsertAvatar(uid: str):
+def InsertAvatar(uid: str) -> bool:
     # 尝试从全局头像中快速绑定头像并更改64x64
     if os.path.exists(f"{UserDataPath}/GlobalAvatar"):
         try:
@@ -46,10 +46,12 @@ def InsertAvatar(uid: str):
         with open(config_path, "rb") as f:
             with sql.write_file(uid, "avatar.png") as stream:
                 stream.write(f.read())
+        return True
     except FileNotFoundError:
-        pass
+        return False
     except Exception as e:
         print(f"修改头像失败: {e}")
+        return False
 
 # 修改昵称
 def ChangeName(uid: str, name: str) -> bool:
@@ -97,3 +99,10 @@ def DeOP(uid: str) -> bool:
     except Exception as e:
         print(f"收回管理员失败: {e}")
         return False
+    
+# 完全注销用户
+def RemoveUser(uid: str) -> bool:
+    try:
+        sql.Wipe(uid)
+    except Exception as e:
+        print(f"用户注销失败: {e}")
