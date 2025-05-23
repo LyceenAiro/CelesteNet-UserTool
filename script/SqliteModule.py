@@ -3,14 +3,13 @@ import os
 import sqlite3
 import uuid
 import threading
-from typing import Optional, List, TypeVar, Type
+from typing import Optional, List, Type
 from enum import Enum
 import msgpack
 import yaml
 from io import BytesIO
 from datetime import datetime, timedelta, timezone
-
-T = TypeVar('T')
+from util.log import _log
 
 class DataFormat(Enum):
     MessagePack = 0
@@ -53,6 +52,7 @@ class SqliteUserData:
         return self._Batch.value
     
     def _initialize_database(self):
+        _log._INFO("正在初始化数据库")
         with self.Open(sqlite3.PARSE_DECLTYPES) as conn:
             conn.execute("""
                 CREATE TABLE [meta] (
@@ -79,6 +79,7 @@ class SqliteUserData:
                 );
             """)
             conn.commit()
+        _log._INFO("√ 初始化数据库完成")
     
     def Open(self, mode=sqlite3.PARSE_DECLTYPES):
         """打开数据库连接"""
@@ -138,14 +139,19 @@ class SqliteUserData:
     
     def GetUID(self, key: str) -> str:
         """通过key获取UID"""
+        _log._INFO(f"正在通过密钥 {key} 匹配uid")
         if not key:
+            _log._WARN(f"x {key} 无法匹配到任何uid")
             return ""
         
         with self.Open() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT uid FROM meta WHERE key = ? LIMIT 1", (key,))
             row = cursor.fetchone()
-            return row[0] if row else ""
+            result = row[0] if row else ""
+            if result:
+                _log._INFO(f"√ 匹配成功 {result}: {key}")
+            return result
     
     def GetKey(self, uid: str) -> str:
         """通过UID获取key"""
@@ -190,15 +196,15 @@ class SqliteUserData:
                 conn.commit()
             return True
         except Exception as e:
-            print(f"x 用户注销失败: {e}")
+            _log._ERROR(f"x 用户注销失败: {e}")
             return False
     
     def Create(self, uid: str, force_new_key: bool = False) -> str:
-        """创建用户&Yaml或获取现有密钥"""
+        """创建用户&Yaml"""
         with self.GlobalLock:
             key = self.GetKey(uid)
             if key and not force_new_key:
-                return key
+                return False
             
             while True:
                 key_full = str(uuid.uuid4()).replace("-", "")
