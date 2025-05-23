@@ -8,6 +8,7 @@ from enum import Enum
 import msgpack
 import yaml
 from io import BytesIO
+from datetime import datetime, timedelta, timezone
 
 T = TypeVar('T')
 
@@ -167,7 +168,6 @@ class SqliteUserData:
             if not row or row[0]:
                 return
             
-            # 检查其他表中是否还有该UID的数据
             for table in self.GetAllTables():
                 if table == "meta":
                     continue
@@ -175,8 +175,7 @@ class SqliteUserData:
                 cursor.execute(f"SELECT iid FROM [{table}] WHERE uid = ? LIMIT 1", (uid,))
                 if cursor.fetchone():
                     return
-            
-            # 如果没有数据，则完全删除
+                
             self.Wipe(uid)
     
     def Wipe(self, uid: str) -> None:
@@ -191,7 +190,7 @@ class SqliteUserData:
                 conn.commit()
             return True
         except Exception as e:
-            print(f"用户注销失败: {e}")
+            print(f"x 用户注销失败: {e}")
             return False
     
     def Create(self, uid: str, force_new_key: bool = False) -> str:
@@ -258,6 +257,78 @@ class SqliteUserData:
             if cursor.rowcount == 0:
                 print(f"ERROR: InsertData: Failed to insert {table} for UID {uid}")
                 return
+    
+    def insert_ban(self, uid: str, minutes: int = 0, days: int = 0, Reason: str = "None Reason") -> dict:
+        """插入Ban信息, 会覆盖旧的Ban"""
+        BanInfo = {
+            "UID": uid,
+            "Name": self.get_data(uid, "BasicUserInfo")["Name"],
+            "Reason": Reason,
+            "From": datetime.now(timezone.utc) + timedelta(hours=8),
+            "To": None
+        }
+        
+        # Ban To
+        if minutes >= 0 and days >= 0:
+            if minutes == 0 and days == 0:
+                if BanInfo["Reason"] == "None Reason":
+                    BanInfo["Reason"] = "Ban To: Forever"
+            else:
+                target_time = datetime.now(timezone.utc) + timedelta(minutes=minutes, days=days, hours=8)
+                BanInfo["To"] = target_time
+                if BanInfo["Reason"] == "None Reason":
+                    BanInfo["Reason"] = target_time.strftime("Ban To: %Y-%m-%d %H:%M:%S")
+                
+        msgpack_data = msgpack.packb(BanInfo, use_bin_type=True, datetime=True)
+        table = self.GetDataTable("BanInfo", create=True)
+
+        with self.Open() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                f"""
+                REPLACE INTO [{table}] (uid, format, value)
+                VALUES (?, ?, ?)
+                """,
+                (uid, 0, msgpack_data)
+            )
+            if cursor.rowcount == 0:
+                print(f"ERROR: InsertData: Failed to insert {table} for UID {uid}")
+                return False
+        return BanInfo
+    
+    def GetBanData(self, uid: str) -> dict:
+        result_dict = {
+            "Reason": None,
+            "StartTime": None,
+            "EndTime": None
+        }
+        data = self.get_data(uid, "BanInfo")
+        if data is None:
+            return None
+        result_dict["Reason"] = data["Reason"]
+        result_dict["StartTime"] = (datetime.fromtimestamp(data["From"].seconds + data["From"].nanoseconds / 1e9) - timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+        if data["To"] is None:
+            result_dict["EndTime"] = "永久封禁"
+        else:
+            result_dict["EndTime"] = (datetime.fromtimestamp(data["To"].seconds + data["To"].nanoseconds / 1e9) - timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+        return result_dict
+    
+    def ClearBanData(self, uid: str) -> bool:
+        """误封等误解"""
+        try:
+            with self.Open() as conn:
+                cursor = conn.cursor()
+                table = self.GetDataTable("BanInfo", create=True)
+                cursor.execute(f"SELECT uid FROM [{table}] WHERE uid = ? LIMIT 1", (uid,))
+                row = cursor.fetchone()
+                if not row or row[0]:
+                    return False
+                conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
+                conn.commit()
+            return True
+        except Exception as e:
+            print(f"x 删除封禁记录时发生错误: {e}")
+            return False
             
     def write_file(self, uid, name):
         """
@@ -297,6 +368,28 @@ class SqliteUserData:
             if not row:
                 return None
             return BytesIO(row[0])
+        
+    def get_data(self, uid: str, name: str) -> Optional[dict]:
+        """根据 UID 和表名读取数据"""
+        table = self.GetDataTable(name, create=False)
+        
+        with self.Open() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                f"""
+                SELECT value FROM [{table}] 
+                WHERE uid = ?
+                """,
+                (uid,)
+            )
+            row = cursor.fetchone()
+            
+            if not row:
+                return None
+            
+            msgpack_data = row[0]
+            return msgpack.unpackb(msgpack_data, raw=False)
+
 
 class BatchContext:
     def __init__(self, user_data: SqliteUserData):

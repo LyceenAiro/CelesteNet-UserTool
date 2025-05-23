@@ -2,6 +2,7 @@ import os
 import shutil
 import yaml
 from PIL import Image
+from datetime import datetime, timedelta
 from SqliteModule import SqliteUserData
 from YamlRead import UserDataPath, real, module
 
@@ -38,7 +39,7 @@ def InsertAvatar(uid: str) -> bool:
         except FileNotFoundError:
             pass
         except Exception as e:
-            print(f"全局头像初始错误: {e}")
+            print(f"x 全局头像初始错误: {e}")
     else:
         os.makedirs(f"{UserDataPath}/GlobalAvatar")
     try:
@@ -50,7 +51,7 @@ def InsertAvatar(uid: str) -> bool:
     except FileNotFoundError:
         return False
     except Exception as e:
-        print(f"修改头像失败: {e}")
+        print(f"x 修改头像失败: {e}")
         return False
 
 # 修改昵称
@@ -65,7 +66,7 @@ def ChangeName(uid: str, name: str) -> bool:
         InsertBasicInfo(uid)
         return True
     except Exception as e:
-        print(f"修改昵称失败: {e}")
+        print(f"x 修改昵称失败: {e}")
         return False
 
 # 赋予玩家管理员
@@ -81,7 +82,7 @@ def GiveOP(uid: str) -> bool:
         InsertBasicInfo(uid)
         return True
     except Exception as e:
-        print(f"赋予管理员失败: {e}")
+        print(f"x 赋予管理员失败: {e}")
         return False
 
 # 移除玩家管理员
@@ -97,7 +98,7 @@ def DeOP(uid: str) -> bool:
         InsertBasicInfo(uid)
         return True    
     except Exception as e:
-        print(f"收回管理员失败: {e}")
+        print(f"x 收回管理员失败: {e}")
         return False
     
 # 完全注销用户
@@ -106,13 +107,32 @@ def RemoveUser(uid: str) -> bool:
         if not sql.Wipe(uid):
             return False
         shutil.rmtree(f"{UserDataPath}/User/{uid}")
+        print(f"√ 用户数据删除成功")
     except FileNotFoundError:
         pass
     except PermissionError:
-        print(f"删除用户缓存时发生错误: 权限不足")
+        print(f"x 删除用户缓存时发生错误: 权限不足")
     except Exception as e:
-        print(f"删除用户缓存时发生错误: {e}")
+        print(f"x 删除用户缓存时发生错误: {e}")
     return True
+
+# 检查Ban信息
+def GetBanInfo(uid: str) -> dict:
+    data = sql.GetBanData(uid)
+    if data is None:
+        print("x 没有查询到对应用户信息")
+    else:
+        print(f"用户名: {uid}\n封禁原因: {data["Reason"]}\n封禁时间: {data["StartTime"]}\n解禁时间: {data["EndTime"]}")
+    return data
+
+# 清除Ban记录
+def DeBan(uid: str) -> bool:
+    data = sql.ClearBanData(uid)
+    if data:
+        print(f"√ 用户 {uid} Ban记录清空成功")
+    else:
+        print(f"x 用户 {uid} Ban记录清空失败")
+    return data
 
 # 查询用户信息
 def GetUserInfo(index: str) -> dict:
@@ -130,7 +150,7 @@ def GetUserInfo(index: str) -> dict:
         result_dict["uid"] = index
         result_dict["key"] = sql.GetKey(index)
     if result_dict["uid"] == "" or result_dict["key"] == "":
-        print("未匹配到该用户的信息")
+        print("x 未匹配到该用户的信息")
         return None
     with open(f"{UserDataPath}/User/{result_dict['uid']}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}

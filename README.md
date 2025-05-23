@@ -13,5 +13,6 @@
 - [x] 用户密钥重置
 - [x] 完全注销用户
 - [x] 查询用户信息
+- [x] 用户封禁管理
 ## License
 [BSD 3-Clause License](./LICENSE)
