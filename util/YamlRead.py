@@ -6,7 +6,8 @@ DEFAULT_CONFIG = {
     'UserDataPath': '/serverpath/UserData/',
     'real': 'Celeste.Mod',
     'module': 'CelesteNet.Server',
-    'JWT_SECRET_KEY': "abcdefgh12345678",
+    'CelesteNetApi': 'localhost:17232/api',
+    'JWT_SECRET_KEY': 'abcdefgh12345678',
     'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': 60
 }
 
@@ -42,5 +43,6 @@ init_config()
 UserDataPath = get_config('UserDataPath')
 real = get_config('real')
 module = get_config('module')
+CelesteNetApi = get_config('CelesteNetApi')
 JWT_SECRET_KEY = get_config('JWT_SECRET_KEY')
 JWT_ACCESS_TOKEN_EXPIRES_MINUTES = int(get_config('JWT_ACCESS_TOKEN_EXPIRES_MINUTES'))

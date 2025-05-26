@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 from werkzeug.utils import secure_filename
 import os
+from functools import wraps
 from script.UserManageAPI import *
 from datetime import timedelta
 from util.YamlRead import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
@@ -18,6 +19,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=JWT_ACCESS_TOKEN_EXPI
 jwt = JWTManager(app)
 
 def admin_required(fn):
+    @wraps(fn)
     @jwt_required()
     def wrapper(*args, **kwargs):
         current_uid = get_jwt_identity()
@@ -145,9 +147,10 @@ def reset_key(uid):
     })
 
 # 封禁用户
-@app.route('/api/ban/<uid>', methods=['GET'])
+@app.route('/api/ban', methods=['GET'])
 @admin_required
-def get_ban_info(uid):
+def ban_user():
+    uid = request.json.get('uid')
     info = GetBanInfo(uid)
     return jsonify({"status": "success", "data": info})
 
@@ -168,3 +171,9 @@ def change_name(uid):
         return jsonify({"status": "error", "message": "修改昵称失败"}), 500
     
     return jsonify({"status": "success"})
+
+@app.route('/api/ban/<uid>', methods=['GET'])
+@admin_required
+def get_ban_info(uid):
+    info = GetBanInfo(uid)
+    return jsonify({"status": "success", "data": info})
