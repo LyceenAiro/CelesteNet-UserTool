@@ -2,14 +2,20 @@ import os
 import shutil
 import yaml
 from PIL import Image
+
 from script.SqliteModule import SqliteUserData
+from script.WebUserManage import RegisterUser, VerifyUserPassword, UpdateUserPassword
+
 from util.log import _log
 from util.YamlRead import UserDataPath, real, module
+from util.security import PasswordHelper
 
 sql = SqliteUserData(user_data_root=UserDataPath, real=real, module=module)
 
 # 创建一个新的用户
-def CreateUserData(uid: str) -> list:
+def CreateUserData(uid: str, pwd: str) -> list:
+    if not RegisterUser(uid, pwd):
+        return
     resultKey = sql.Create(uid)
     if not resultKey:
         _log._ERROR(f"[CreateUserData]x 新建用户失败, 用户 {uid} 已被注册")
@@ -150,7 +156,8 @@ def GetUserInfo(index: str) -> dict:
         "key": None,
         "name": None,
         "Avatar": False,
-        "Admin": False
+        "Admin": False,
+        "Email": None
     }
     if len(index) == 16 and all(i in '0123456789abcdefABCDEF' for i in index):
         result_dict["key"] = index
@@ -161,6 +168,13 @@ def GetUserInfo(index: str) -> dict:
     if result_dict["uid"] == "" or result_dict["key"] == "":
         _log._WARN(f"[GetUserInfo]x 未匹配到索引 {index} 的信息")
         return None
+    with sql.Open() as conn:
+        cursor = conn.execute("""
+            SELECT email FROM web_users WHERE uid = ?
+        """, (result_dict["uid"],))
+        pwd_result = cursor.fetchone()
+        if pwd_result:
+            result_dict["Email"] = pwd_result[0]
     with open(f"{UserDataPath}/User/{result_dict['uid']}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}
     result_dict["name"] = data["Name"]
@@ -170,3 +184,10 @@ def GetUserInfo(index: str) -> dict:
         result_dict["Avatar"] = True
     _log._INFO(f"[GetUserInfo]{result_dict}")
     return result_dict
+
+def is_CheckAdmin(uid: str) -> bool:
+    with open(f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+    if "admin" in data["Tags"]:
+        return True
+    return False

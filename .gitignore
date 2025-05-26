@@ -12,7 +12,7 @@ main.build
 
 # 调试文件
 *.yaml
-/log
+/CNUTlog
 /*.log
 ~*
 test*

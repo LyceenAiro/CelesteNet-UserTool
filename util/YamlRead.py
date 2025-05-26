@@ -5,7 +5,9 @@ from typing import Dict, Any
 DEFAULT_CONFIG = {
     'UserDataPath': '/serverpath/UserData/',
     'real': 'Celeste.Mod',
-    'module': 'CelesteNet.Server'
+    'module': 'CelesteNet.Server',
+    'JWT_SECRET_KEY': "abcdefgh12345678",
+    'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': 60
 }
 
 _config: Dict[str, Any] = {}
@@ -40,3 +42,5 @@ init_config()
 UserDataPath = get_config('UserDataPath')
 real = get_config('real')
 module = get_config('module')
+JWT_SECRET_KEY = get_config('JWT_SECRET_KEY')
+JWT_ACCESS_TOKEN_EXPIRES_MINUTES = int(get_config('JWT_ACCESS_TOKEN_EXPIRES_MINUTES'))

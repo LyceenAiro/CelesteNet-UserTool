@@ -36,6 +36,9 @@ class SqliteUserData:
             
         if not os.path.exists(self.DBPath):
             self._initialize_database()
+
+        self.InitWebUserTable()
+        
     
     @property
     def UserDataRoot(self):
@@ -52,7 +55,7 @@ class SqliteUserData:
         return self._Batch.value
     
     def _initialize_database(self):
-        _log._INFO("正在初始化数据库")
+        _log._INFO("[_initialize_database]正在初始化数据库")
         with self.Open(sqlite3.PARSE_DECLTYPES) as conn:
             conn.execute("""
                 CREATE TABLE [meta] (
@@ -79,7 +82,25 @@ class SqliteUserData:
                 );
             """)
             conn.commit()
-        _log._INFO("√ 初始化数据库完成")
+        _log._INFO("[_initialize_database]√ 初始化数据库完成")
+
+    def InitWebUserTable(self):
+        _log._INFO("[InitWebUserTable]正在初始化/加载数据库")
+        with self.Open(sqlite3.PARSE_DECLTYPES) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS [usertool.user] (
+                    iid INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uid VARCHAR(255) UNIQUE,
+                    password_hash VARCHAR(255) NOT NULL,
+                    salt VARCHAR(64) NOT NULL,
+                    email VARCHAR(255),
+                    last_login TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+            conn.commit()
+        _log._INFO("[InitWebUserTable]√ 初始化/加载数据库完成")
+
     
     def Open(self, mode=sqlite3.PARSE_DECLTYPES):
         """打开数据库连接"""
