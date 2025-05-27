@@ -140,6 +140,10 @@ def GetBanInfo(uid: str) -> dict:
     _log._INFO(f"[GetBanInfo]uid: {uid} BanInfo: {data}")
     return data
 
+# Ban一名玩家
+def BanUser(uid, minutes=0, days=0, Reason="None Reason") -> dict:
+    return sql.insert_ban(uid, minutes=minutes, days=days, Reason=Reason)
+
 # 清除Ban记录
 def DeBan(uid: str) -> bool:
     data = sql.ClearBanData(uid)
