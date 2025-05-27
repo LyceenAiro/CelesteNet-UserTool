@@ -13,8 +13,8 @@ from util.security import PasswordHelper
 sql = SqliteUserData(user_data_root=UserDataPath, real=real, module=module)
 
 # 创建一个新的用户
-def CreateUserData(uid: str, pwd: str) -> list:
-    if not RegisterUser(uid, pwd):
+def CreateUserData(uid: str, pwd: str, email: str = None) -> list:
+    if not RegisterUser(uid, pwd, email):
         return
     resultKey = sql.Create(uid)
     if not resultKey:

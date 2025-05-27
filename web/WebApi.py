@@ -80,28 +80,27 @@ def login():
 def logout():
     return jsonify({"status": "success"})
 
-# 退出登录
-@app.route('/api/celestenet_url', methods=['POST'])
+# 前端重定向API
+@app.route('/api/celestenet_url', methods=['GET'])
 def getCelesteNetAPI():
-    return jsonify({"url": f"http://{CelesteNetApi}"})
+    return jsonify({"url": f"http://{CelesteNetApi}".replace("/api", "")})
 
 # 用户注册
 @app.route('/api/register', methods=['POST'])
 def register():
     """
     输入类型:
-    <uid>       在链接中插入: 用户名
+    uid         注册用户名
     new_pwd     新的密码
 
     用户可以注册自己的网页账户
     注册完成后会自动创建客户端相关的用户信息
 
     返回字段:
-    success     修改成功
-    error       修改失败
-    message     修改失败原因, 只有在修改失败后携带
-    uid         用户名, 只会在创建成功时返回
-    key         密钥, 只会在创建成功时返回
+    status      注册是否成功
+    message     注册失败后返回的信息
+    uid         注册成功返回uid
+    key         注册成功后返回key
     """
     uid = request.json.get('uid')
     password = request.json.get('password')
@@ -109,7 +108,7 @@ def register():
     
     if not uid or not password:
         return jsonify({"status": "error", "message": "用户名密码的格式不正确"}), 400
-    create_result = CreateUserData(uid, password)
+    create_result = CreateUserData(uid, password, email)
     if not create_result:
         return jsonify({"status": "error", "message": "用户已存在"}), 400    
     return jsonify({
@@ -381,5 +380,11 @@ def get_players_list():
     result_info = []
     if info:
         for i in info:
-            result_info.append({"Name": i["name"], "Avatar": i["Avatar"]})
+            i_dict = {
+                "Name": i["Name"], 
+                "Avatar": "/api/avatar?uid=Guest"
+                }
+            if "Avatar" in i:
+                i_dict["Avatar"] = i["Avatar"]
+            result_info.append(i_dict)
     return jsonify({"status": "success", "data": result_info})

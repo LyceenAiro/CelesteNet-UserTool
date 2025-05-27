@@ -37,7 +37,7 @@ class SqliteUserData:
         if not os.path.exists(self.DBPath):
             self._initialize_database()
 
-        if module == "web.user":
+        if module == "Web.User":
             self.InitWebUserTable()
         
     
