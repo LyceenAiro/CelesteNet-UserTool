@@ -13,21 +13,21 @@ def RegisterUser(uid: str, password: str, email: str = None) -> bool:
     try:
         with sql.Open() as conn:
             conn.execute("""
-                INSERT INTO web_users (uid, password_hash, salt, email)
+                INSERT INTO [usertool.user] (uid, password_hash, salt, email)
                 VALUES (?, ?, ?, ?)
             """, (uid, password_hash, salt, email))
             conn.commit()
-            _log._INFO(f"[RegisterUserWithPassword]√ 用户 {uid} 注册成功")
+            _log._INFO(f"[RegisterUser]√ 用户 {uid} 注册成功")
             return True
     except sqlite3.IntegrityError:
-        _log._ERROR(f"[RegisterUserWithPassword]x 用户 {uid} 已存在")
+        _log._ERROR(f"[RegisterUser]x 用户 {uid} 已存在")
         return False
 
 def VerifyUserPassword(uid: str, password: str) -> bool:
     """验证用户密码"""
     with sql.Open() as conn:
         cursor = conn.execute("""
-            SELECT password_hash, salt FROM web_users WHERE uid = ?
+            SELECT password_hash, salt FROM [usertool.user] WHERE uid = ?
         """, (uid,))
         result = cursor.fetchone()
         
@@ -50,7 +50,7 @@ def UpdateUserPassword(uid: str, new_password: str) -> bool:
     
     with sql.Open() as conn:
         conn.execute("""
-            UPDATE web_users 
+            UPDATE [usertool.user]
             SET password_hash = ?, salt = ?
             WHERE uid = ?
         """, (new_hash, salt, uid))

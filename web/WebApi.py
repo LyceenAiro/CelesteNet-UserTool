@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity, verify_jwt_in_request,
@@ -10,14 +10,18 @@ from functools import wraps
 from script.UserManageAPI import *
 from script.NetApiFormat import *
 from datetime import timedelta
-from util.YamlRead import JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
+from util.YamlRead import CelesteNetApi, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='html')
 
 # 配置 JWT
 app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRES_MINUTES)
 jwt = JWTManager(app)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def admin_required(fn):
     @wraps(fn)
@@ -70,6 +74,17 @@ def login():
         }
     })
 
+# 退出登录
+@app.route('/api/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    return jsonify({"status": "success"})
+
+# 退出登录
+@app.route('/api/celestenet_url', methods=['POST'])
+def getCelesteNetAPI():
+    return jsonify({"url": f"http://{CelesteNetApi}"})
+
 # 用户注册
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -94,12 +109,9 @@ def register():
     
     if not uid or not password:
         return jsonify({"status": "error", "message": "用户名密码的格式不正确"}), 400
-    create_result = CreateUserData(uid)
+    create_result = CreateUserData(uid, password)
     if not create_result:
-        return jsonify({"status": "error", "message": "用户已存在"}), 400
-    if not RegisterUser(uid, password, email):
-        return jsonify({"status": "error", "message": "密码设置失败"}), 500
-    
+        return jsonify({"status": "error", "message": "用户已存在"}), 400    
     return jsonify({
         "status": "success",
         "uid": uid,
@@ -240,7 +252,7 @@ def ban_user():
     From        开始封禁时间
     To          结束封禁时间, 如果为None为永久封禁
     """
-    uid = request.json.get('uid')
+    uid = request.args.get('uid')
     info = BanUser(uid)
     if not info:
         info = None
@@ -261,7 +273,7 @@ def deban_user():
     True        如果删除成功
     False       删除失败
     """
-    uid = request.json.get('uid')
+    uid = request.args.get('uid')
     info = DeBan(uid)
     return jsonify({"status": "success", "data": info})
 
@@ -295,7 +307,7 @@ def change_name(uid):
 
 # 查询被Ban的用户
 @app.route('/api/baninfo', methods=['GET'])
-def get_ban_info(uid):
+def get_ban_info():
     """
     输入类型:
     uid         想要查询的用户名
@@ -313,7 +325,7 @@ def get_ban_info(uid):
     StartTime   开始封禁时间
     EndTime     结束封禁时间, 如果为None为永久封禁
     """
-    uid = request.json.get('uid')
+    uid = request.args.get('uid')
     info = GetBanInfo(uid)
     return jsonify({"status": "success", "data": info})
 

@@ -174,7 +174,7 @@ def GetUserInfo(index: str) -> dict:
         return None
     with sql.Open() as conn:
         cursor = conn.execute("""
-            SELECT email FROM web_users WHERE uid = ?
+            SELECT email FROM [usertool.user] WHERE uid = ?
         """, (result_dict["uid"],))
         pwd_result = cursor.fetchone()
         if pwd_result:

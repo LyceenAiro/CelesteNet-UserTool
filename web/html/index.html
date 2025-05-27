@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CelesteNetCN</title>
+    <style>
+        :root {
+            --blue-bg: #ffffff;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 10px;
+            --padding: 20px;
+            --margin: 15px;
+            --gap: 5px;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--blue-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: calc(100% - 20px);
+            max-width: 1200px;
+            margin: var(--margin) auto;
+            padding: var(--padding);
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px var(--shadow-color);
+            display: flex;
+            gap: var(--gap);
+            min-height: calc(100vh - 30px - 40px);
+        }
+        
+        .left-panel, .right-panel {
+            flex: 1;
+            padding: var(--padding);
+            background-color: var(--container-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 6px 6px 0 0;
+            margin-right: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            background-color: #f6f8fa;
+            border-color: #e1e4e8;
+            border-bottom-color: transparent;
+        }
+        
+        .tab-content {
+            flex: 1;
+            overflow: auto;
+        }
+        
+        .server-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .info-item {
+            padding: 10px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .info-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #0366d6;
+        }
+        
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .player-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+        }
+        
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #e1e4e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .ban-search {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-button {
+            padding: 8px 16px;
+            background-color: #2ea44f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .ban-info {
+            padding: 15px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+        }
+        
+        .ban-info-item {
+            margin-bottom: 10px;
+        }
+        
+        .ban-info-item strong {
+            color: #d73a49;
+        }
+        
+        .login-form, .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-button {
+            padding: 8px 16px;
+            background-color: #2ea44f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .secondary-button {
+            background-color: #f6f8fa;
+            color: #24292e;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e1e4e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .user-id {
+            font-size: 14px;
+            color: #586069;
+        }
+        
+        .user-admin {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: #d73a49;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+        
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .user-stat {
+            padding: 10px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .user-stat strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #0366d6;
+        }
+        
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            font-size: 30px;
+            color: white;
+        }
+        
+        .success {
+            background-color: #2ea44f;
+        }
+        
+        .error {
+            background-color: #d73a49;
+        }
+        
+        .result-message {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #0366d6;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel" style="--shadow-color: rgba(0, 0, 0, 0.15)">
+            <div class="tab-container">
+                <div class="tab active" data-tab="server-status">服务器状态</div>
+                <div class="tab" data-tab="player-list">玩家列表</div>
+                <div class="tab" data-tab="ban-search">封禁查询</div>
+            </div>
+            <div class="tab-content">
+                <div id="server-status" class="tab-panel">
+                    <div class="server-info" id="server-info-container">
+                        <!-- 服务器信息将在这里动态加载 -->
+                    </div>
+                </div>
+                <div id="player-list" class="tab-panel hidden">
+                    <div class="player-list" id="player-list-container">
+                        <!-- 玩家列表将在这里动态加载 -->
+                    </div>
+                </div>
+                <div id="ban-search" class="tab-panel hidden">
+                    <div class="ban-search">
+                        <input type="text" class="search-input" id="ban-search-input" placeholder="输入用户名查询封禁记录">
+                        <button class="search-button" id="ban-search-button">查询</button>
+                        <div class="ban-info" id="ban-info-container">
+                            <!-- 封禁信息将在这里动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-panel"  style="--shadow-color: rgba(0, 0, 0, 0.15)">
+            <div id="login-section">
+                <div class="login-form">
+                    <div class="form-group">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-input" id="login-username" placeholder="输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-input" id="login-password" placeholder="输入密码">
+                    </div>
+                    <button class="form-button" id="login-button">登录</button>
+                    <button class="form-button secondary-button" id="register-button">注册</button>
+                </div>
+            </div>
+            <div id="register-section" class="hidden">
+                <div class="back-button" id="back-to-login">
+                    ← 返回
+                </div>
+                <div class="register-form">
+                    <div class="form-group">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-input" id="register-username" placeholder="输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-input" id="register-password" placeholder="输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">确认密码</label>
+                        <input type="password" class="form-input" id="register-confirm-password" placeholder="再次输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">邮箱 (选填)</label>
+                        <input type="email" class="form-input" id="register-email" placeholder="输入邮箱地址">
+                    </div>
+                    <button class="form-button" id="register-submit-button">注册</button>
+                </div>
+            </div>
+            <div id="user-info-section" class="hidden">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-avatar" id="user-avatar-container">
+                            <!-- 用户头像将在这里动态加载 -->
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name" id="user-name-display">
+                                <!-- 用户名将在这里动态加载 -->
+                            </div>
+                            <div class="user-id" id="user-id-display">
+                                <!-- 用户ID将在这里动态加载 -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="user-stat">
+                            <strong>管理员</strong>
+                            <span id="user-admin-status">否</span>
+                        </div>
+                        <div class="user-stat">
+                            <strong>邮箱</strong>
+                            <span id="user-email">未设置</span>
+                        </div>
+                    </div>
+                    <button class="form-button" id="logout-button" style="margin-top: 20px; background-color: #ff5364;">退出登录</button>
+                </div>
+            </div>
+            <div id="register-result-section" class="hidden">
+                <!-- 注册结果将在这里动态显示 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 服务器地址配置
+        const SERVER_URL = '';
+        const CelesteNet_URL = ''
+        
+        // DOM元素
+        const tabs = document.querySelectorAll('.tab');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const userInfoSection = document.getElementById('user-info-section');
+        const registerResultSection = document.getElementById('register-result-section');
+        const backToLoginButton = document.getElementById('back-to-login');
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const registerSubmitButton = document.getElementById('register-submit-button');
+        const banSearchButton = document.getElementById('ban-search-button');
+        const logoutButton = document.getElementById('logout-button');
+        
+        // 标签页切换
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有标签的active类
+                tabs.forEach(t => t.classList.remove('active'));
+                // 给当前点击的标签添加active类
+                tab.classList.add('active');
+                
+                // 隐藏所有面板
+                tabPanels.forEach(panel => panel.classList.add('hidden'));
+                // 显示对应的面板
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.remove('hidden');
+                
+                // 如果切换到玩家列表且已登录，则加载玩家列表
+                if (tabId === 'player-list' && isLoggedIn()) {
+                    loadPlayerList();
+                }
+            });
+        });
+        
+        // 登录/注册切换
+        registerButton.addEventListener('click', () => {
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('hidden');
+        });
+        
+        backToLoginButton.addEventListener('click', () => {
+            registerSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+        });
+        
+        // 登录功能
+        loginButton.addEventListener('click', async () => {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                alert('请输入用户名和密码');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: username,
+                        pwd: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // 保存token到localStorage
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('uid', data.user_info.uid);
+                    
+                    // 加载用户信息
+                    loadUserInfo(data.user_info.uid);
+                    
+                    // 切换到用户信息显示
+                    loginSection.classList.add('hidden');
+                    userInfoSection.classList.remove('hidden');
+                    
+                    // 如果当前显示的是玩家列表，则重新加载
+                    if (document.querySelector('.tab.active').getAttribute('data-tab') === 'player-list') {
+                        loadPlayerList();
+                    }
+                } else {
+                    alert(data.message || '登录失败');
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                alert('登录过程中发生错误');
+            }
+        });
+        
+        // 注册功能
+        registerSubmitButton.addEventListener('click', async () => {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const email = document.getElementById('register-email').value;
+            
+            if (!username || !password || !confirmPassword) {
+                alert('请填写所有必填字段');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('两次输入的密码不一致');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: username,
+                        password: password,
+                        email: email || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 显示注册结果
+                registerSection.classList.add('hidden');
+                registerResultSection.classList.remove('hidden');
+                
+                if (data.status === 'success') {
+                    registerResultSection.innerHTML = `
+                        <div class="result-icon success">✓</div>
+                        <div class="result-message">注册成功！</div>
+                    `;
+                    
+                    // 3秒后返回登录界面
+                    setTimeout(() => {
+                        registerResultSection.classList.add('hidden');
+                        loginSection.classList.remove('hidden');
+                        // 清空注册表单
+                        document.getElementById('register-username').value = '';
+                        document.getElementById('register-password').value = '';
+                        document.getElementById('register-confirm-password').value = '';
+                        document.getElementById('register-email').value = '';
+                    }, 3000);
+                } else {
+                    registerResultSection.innerHTML = `
+                        <div class="result-icon error">✕</div>
+                        <div class="result-message">${data.message || '注册失败'}</div>
+                    `;
+                    
+                    // 添加返回按钮
+                    const backButton = document.createElement('div');
+                    backButton.className = 'back-button';
+                    backButton.innerHTML = '← 返回注册';
+                    backButton.addEventListener('click', () => {
+                        registerResultSection.classList.add('hidden');
+                        registerSection.classList.remove('hidden');
+                    });
+                    registerResultSection.appendChild(backButton);
+                }
+            } catch (error) {
+                console.error('注册错误:', error);
+                alert('注册过程中发生错误');
+            }
+        });
+
+        // 封禁查询功能
+        banSearchButton.addEventListener('click', async () => {
+            const username = document.getElementById('ban-search-input').value;
+            
+            if (!username) {
+                alert('请输入要查询的用户名');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/baninfo?uid=${username}`);
+                const data = await response.json();
+                
+                const banInfoContainer = document.getElementById('ban-info-container');
+                
+                if (data.data) {
+                    banInfoContainer.innerHTML = `
+                        <div class="ban-info-item">
+                            <strong>封禁原因:</strong> ${data.data.Reason || '无'}
+                        </div>
+                        <div class="ban-info-item">
+                            <strong>开始时间:</strong> ${data.data.StartTime || '无'}
+                        </div>
+                        <div class="ban-info-item">
+                            <strong>结束时间:</strong> ${data.data.EndTime ? data.data.EndTime : '永久封禁'}
+                        </div>
+                    `;
+                } else {
+                    banInfoContainer.innerHTML = '<div class="ban-info-item">该用户没有封禁记录</div>';
+                }
+            } catch (error) {
+                console.error('封禁查询错误:', error);
+                alert('查询封禁信息时发生错误');
+            }
+        });
+
+        // 检查登录状态
+        function isLoggedIn() {
+            return localStorage.getItem('access_token') !== null;
+        }
+
+        // 加载用户信息
+        async function loadUserInfo(uid) {
+            try {
+                const response = await fetch(`/api/user/${uid}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // 显示用户信息
+                    document.getElementById('user-name-display').textContent = data.data.name;
+                    document.getElementById('user-id-display').textContent = data.data.uid;
+                    
+                    if (data.data.Admin) {
+                        document.getElementById('user-admin-status').textContent = '是';
+                        document.getElementById('user-admin-status').parentElement.innerHTML += 
+                            '<span class="user-admin">管理员</span>';
+                    } else {
+                        document.getElementById('user-admin-status').textContent = '否';
+                    }
+                    
+                    document.getElementById('user-email').textContent = data.data.Email || '未设置';
+                    
+                    // 加载头像
+                    if (data.data.Avatar) {
+                        const avatarContainer = document.getElementById('user-avatar-container');
+                        avatarContainer.innerHTML = `<img src="${CelesteNet_URL}/api/avatar?uid=${uid}" alt="用户头像">`;
+                    }
+                }
+            } catch (error) {
+                console.error('加载用户信息错误:', error);
+            }
+        }
+
+        // 加载玩家列表
+        async function loadPlayerList() {
+            try {
+                const response = await fetch(`/api/players`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                const playerListContainer = document.getElementById('player-list-container');
+                
+                if (data.status === 'success') {
+                    if (data.data && data.data.length > 0) {
+                        playerListContainer.innerHTML = '';
+                        
+                        data.data.forEach(player => {
+                            const playerItem = document.createElement('div');
+                            playerItem.className = 'player-item';
+                            playerItem.innerHTML = `
+                                <div class="player-avatar">
+                                    <img src="${CelesteNet_URL}${player.Avatar}" alt="${player.Name}的头像">
+                                </div>
+                                <div>${player.Name}</div>
+                            `;
+                            playerListContainer.appendChild(playerItem);
+                        });
+                    } else {
+                        playerListContainer.innerHTML = '<div class="player-item">当前没有在线玩家</div>';
+                    }
+                } else if (data.message === '需要登录') {
+                    playerListContainer.innerHTML = '<div class="player-item">请登录</div>';
+                }
+            } catch (error) {
+                console.error('加载玩家列表错误:', error);
+                document.getElementById('player-list-container').innerHTML = '<div class="player-item">加载玩家列表失败</div>';
+            }
+        }
+
+        // 加载服务器信息
+        async function loadServerInfo() {
+            try {
+                const response = await fetch(`/api/server`);
+                const data = await response.json();
+                const serverInfoContainer = document.getElementById('server-info-container');
+                console.log(CelesteNet_URL)
+                if (data.status === 'success' && data.data) {
+                    serverInfoContainer.innerHTML = `
+                        <div class="info-item">
+                            <strong>在线玩家</strong>
+                            <span>${data.data.PlayerRefs || 0}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>总登录次数</strong>
+                            <span>${data.data.PlayerCounter || 0}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>服务器启动时间</strong>
+                            <span>${data.data.StartupTime || '未知'}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>被封禁玩家</strong>
+                            <span>${data.data.Banned || 0}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>注册用户</strong>
+                            <span>${data.data.Registered || 0}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>服务器Tick率</strong>
+                            <span>${data.data.TickRate || 0}</span>
+                        </div>
+                    `;
+                } else {
+                    serverInfoContainer.innerHTML = '<div class="info-item">加载服务器信息失败</div>';
+                }
+            } catch (error) {
+                console.error('加载服务器信息错误:', error);
+                document.getElementById('server-info-container').innerHTML = '<div class="info-item">加载服务器信息失败</div>';
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 加载服务器信息
+            loadServerInfo();
+            
+            // 检查登录状态
+            if (isLoggedIn()) {
+                const uid = localStorage.getItem('uid');
+                loadUserInfo(uid);
+                loginSection.classList.add('hidden');
+                userInfoSection.classList.remove('hidden');
+            } else {
+                userInfoSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+            }
+            
+            // 设置默认显示的标签页
+            document.querySelector('.tab[data-tab="server-status"]').classList.add('active');
+            document.getElementById('server-status').classList.remove('hidden');
+        });
+
+        // 退出登录
+        logoutButton.addEventListener('click', async () => {
+            try {
+                // 调用退出API
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+            } catch (error) {
+                console.error('退出错误:', error);
+            } finally {
+                // 无论API调用成功与否，都清除本地token
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('uid');
+                
+                // 切换到登录界面
+                userInfoSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                
+                // 清空登录表单
+                document.getElementById('login-username').value = '';
+                document.getElementById('login-password').value = '';
+                
+                // 如果当前显示的是玩家列表，则重新加载
+                if (document.querySelector('.tab.active').getAttribute('data-tab') === 'player-list') {
+                    loadPlayerList();
+                }
+            }
+        });
+
+        async function loadCelesteAPI() {
+            const response = await fetch(`/api/server`);
+            const data = await response.json();
+            CelesteNet_URL = data.url
+        }
+        
+        loadCelesteAPI()
+    </script>
+</body>
+</html>
+
