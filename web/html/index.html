@@ -11,7 +11,7 @@
             --text-color: #333333;
             --border-radius: 10px;
             --padding: 20px;
-            --margin: 20vh;
+            --margin: 10vh;
             --gap: 10px;
         }
         
@@ -36,7 +36,7 @@
             box-shadow: 0 4px 6px var(--shadow-color);
             display: flex;
             gap: var(--gap);
-            min-height: 50vh;
+            min-height: 70vh;
         }
         
         .left-panel, .right-panel {
@@ -329,8 +329,216 @@
         }
         
         .hidden {
+            display: none !important;
+        }
+
+        /* 模态框样式 */
+        .modal-input{
+            padding: 8px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box; /* 防止溢出 */
+            margin: 10px 0;
+        }
+
+        #cancel-confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            max-width: 90%; /* 添加最大宽度限制 */
+            box-sizing: border-box; /* 包含padding和border */
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 10px; /* 添加按钮间距 */
+        }
+
+        .modal-actions button {
+            flex: 1; /* 使按钮等宽 */
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #cancel-confirm-button {
+            background: #ff5364;
+            color: white;
+        }
+
+        #cancel-cancel-button {
+            background: #f6f8fa;
+        }
+
+        /* 修改现有的模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+
+        /* 密钥操作图标样式 */
+        .key-action-icon {
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 6px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #333; /* 图标颜色 */
+            vertical-align: middle;
+        }
+
+        .key-action-icon:hover {
+            opacity: 1;
+        }
+
+        .key-action-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .icon-eye-off {
+            display: none !important;
+        }
+
+        #edit-nickname {
+            margin-left: 8px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        #edit-nickname:hover {
+            opacity: 1;
+        }
+
+        /* 头像编辑按钮样式 */
+        .avatar-edit-button {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background-color: #0366d6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .avatar-edit-button:hover {
+            opacity: 1;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        /* 隐藏文件输入 */
+        #avatar-upload {
             display: none;
         }
+
+        /* 文件上传按钮样式 */
+        .file-upload-wrapper {
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .file-upload-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #f6f8fa;
+            color: #586069;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .file-upload-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 16px;
+            background-color: #2ea44f;
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .file-upload-input:hover {
+            background-color: #e1e4e8;
+        }
+
+        .file-upload-button:hover {
+            background-color: #22863a;
+        }
+
+        /* 文件选择后的文件名显示 */
+        .file-name-display {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #586069;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
     </style>
 </head>
 <body>
@@ -407,22 +615,53 @@
             <div id="user-info-section" class="hidden">
                 <div class="user-info">
                     <div class="user-header">
-                        <div class="user-avatar" id="user-avatar-container">
-                            <!-- 用户头像将在这里动态加载 -->
+                        <div class="avatar-container">
+                            <div class="user-avatar" id="user-avatar-container">
+                                <!-- 用户头像将在这里动态加载 -->
+                            </div>
+                            <button id="edit-avatar" class="avatar-edit-button" title="修改头像">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <input type="file" id="avatar-upload" accept="image/*">
                         </div>
                         <div class="user-details">
-                            <div class="user-name" id="user-name-display">
-                                <!-- 用户名将在这里动态加载 -->
+                            <div style="display: flex; align-items: center;">
+                                <div class="user-name" id="user-name-display"></div>
+                                <button id="edit-nickname" class="key-action-icon" title="修改昵称" style="margin-left: 8px;">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="user-id" id="user-id-display">
-                                <!-- 用户ID将在这里动态加载 -->
-                            </div>
+                            <div class="user-id" id="user-id-display"></div>
                         </div>
                     </div>
-                    <div class="user-stats" style="grid-template-columns: repeat(1, 1fr)">
-                        <div class="user-stat">
-                            <strong>密钥</strong>
-                            <span id="user-key"></span>
+                    <div class="user-stat">
+                        <strong>密钥
+                            <button id="toggle-key" class="key-action-icon" title="显示/隐藏密钥">
+                                <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button id="copy-key" class="key-action-icon" title="复制密钥">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button id="refresh-key" class="key-action-icon" title="重置密钥">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <polyline points="23 4 23 10 17 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <polyline points="1 20 1 14 7 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </strong>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span id="user-key">****************</span>
                         </div>
                     </div>
                     <div class="user-stats">
@@ -436,6 +675,8 @@
                         </div>
                     </div>
                     <button class="form-button" id="logout-button" style="margin-top: 20px; background-color: #ff5364;">退出登录</button>
+                    <button class="form-button" id="change-password-button" style="background-color: #0366d6;">修改密码</button>
+                    <button class="form-button" id="cancel-user-button" style="background-color: #5e5e5e;">注销用户</button>
                 </div>
             </div>
             <div id="register-result-section" class="hidden">
@@ -443,10 +684,69 @@
             </div>
         </div>
     </div>
-    <div class="version-type">
+    <!-- <div class="version-type">
         v0.1.0
+    </div> -->
+
+    <!-- 注销用户 -->
+    <div id="cancel-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>确认注销账户</h3>
+            <p>此操作会删除你的所有信息</p>
+            <input type="password" id="cancel-confirm-key" class="modal-input" placeholder="输入您的密钥确认">
+            <div class="modal-actions">
+                <button id="cancel-confirm-button" class="form-button" style="background-color: #ff5364;">确认注销</button>
+                <button id="cancel-cancel-button" class="form-button secondary-button">取消</button>
+            </div>
+        </div>
     </div>
 
+    <!-- 修改昵称 -->
+    <div id="edit-nickname-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>修改昵称</h3>
+            <input type="text" id="new-nickname" class="modal-input" placeholder="输入新昵称">
+            <div class="modal-actions">
+                <button id="confirm-nickname" class="form-button" style="background-color: #2ea44f;">确认修改</button>
+                <button id="cancel-nickname" class="form-button secondary-button">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码 -->
+    <div id="edit-password-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>修改密码</h3>
+            <input type="password" id="new-password" class="modal-input" placeholder="输入新密码">
+            <input type="password" id="confirm-new-password" class="modal-input" placeholder="确认新密码">
+            <div class="modal-actions">
+                <button id="confirm-password" class="form-button" style="background-color: #2ea44f;">确认修改</button>
+                <button id="cancel-password" class="form-button secondary-button">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改头像 -->
+    <div id="edit-avatar-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>修改头像</h3>
+            <div style="text-align: center; margin: 15px 0;">
+                <div id="avatar-preview" style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto; background-color: #f6f8fa; overflow: hidden;">
+                    <!-- 头像预览将在这里显示 -->
+                </div>
+            </div>
+            <div class="file-upload-wrapper">
+                <input type="text" class="file-upload-input" id="file-upload-display" placeholder="选择头像图片" readonly>
+                <button class="file-upload-button">浏览</button>
+                <input type="file" id="new-avatar" accept="image/*" style="display: none;">
+            </div>
+            <div id="file-name-display" class="file-name-display"></div>
+            <div class="modal-actions">
+                <button id="confirm-avatar" class="form-button" style="background-color: #2ea44f;">确认修改</button>
+                <button id="cancel-avatar" class="form-button secondary-button">取消</button>
+            </div>
+        </div>
+    </div>
     <script>
         // 服务器地址配置
         const SERVER_URL = '';
@@ -465,6 +765,319 @@
         const registerSubmitButton = document.getElementById('register-submit-button');
         const banSearchButton = document.getElementById('ban-search-button');
         const logoutButton = document.getElementById('logout-button');
+
+        // 确保DOM加载完成后才添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            // 注销用户按钮点击事件
+            document.getElementById('cancel-user-button').addEventListener('click', function() {
+                document.getElementById('cancel-confirm-modal').classList.remove('hidden');
+                document.getElementById('cancel-confirm-key').value = ''; // 清空输入框
+            });
+
+            // 取消按钮点击事件
+            document.getElementById('cancel-cancel-button').addEventListener('click', function() {
+                document.getElementById('cancel-confirm-modal').classList.add('hidden');
+            });
+
+            // 确认注销按钮点击事件
+            document.getElementById('cancel-confirm-button').addEventListener('click', async function() {
+                const inputKey = document.getElementById('cancel-confirm-key').value;
+                if (inputKey !== currentKey) {
+                    alert('密钥不匹配');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/user/${localStorage.getItem('uid')}/cancel_user`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        // 注销成功处理
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('uid');
+                        userInfoSection.classList.add('hidden');
+                        loginSection.classList.remove('hidden');
+                        document.getElementById('cancel-confirm-modal').classList.add('hidden');
+                    } else {
+                        alert(data.message || '注销失败');
+                    }
+                } catch (error) {
+                    console.error('注销错误:', error);
+                    alert('注销过程中发生错误');
+                }
+            });
+
+            // 修改昵称功能
+            document.getElementById('edit-nickname').addEventListener('click', () => {
+                document.getElementById('edit-nickname-modal').classList.remove('hidden');
+                document.getElementById('new-nickname').value = '';
+            });
+
+            document.getElementById('cancel-nickname').addEventListener('click', () => {
+                document.getElementById('edit-nickname-modal').classList.add('hidden');
+            });
+
+            document.getElementById('confirm-nickname').addEventListener('click', async () => {
+                const newNickname = document.getElementById('new-nickname').value.trim();
+                if (!newNickname) {
+                    alert('请输入新昵称');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/user/${localStorage.getItem('uid')}/change_name`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        },
+                        body: JSON.stringify({
+                            name: newNickname
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        document.getElementById('edit-nickname-modal').classList.add('hidden');
+                        document.getElementById('user-name-display').textContent = newNickname;
+                        alert('昵称修改成功');
+                    } else {
+                        alert(data.message || '昵称修改失败');
+                    }
+                } catch (error) {
+                    console.error('修改昵称错误:', error);
+                    alert('修改昵称时发生错误');
+                }
+            });
+
+            // 修改密码功能
+            document.getElementById('change-password-button').addEventListener('click', () => {
+                document.getElementById('edit-password-modal').classList.remove('hidden');
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-new-password').value = '';
+            });
+
+            document.getElementById('cancel-password').addEventListener('click', () => {
+                document.getElementById('edit-password-modal').classList.add('hidden');
+            });
+
+            document.getElementById('confirm-password').addEventListener('click', async () => {
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-new-password').value;
+                
+                if (!newPassword || !confirmPassword) {
+                    alert('请输入新密码和确认密码');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/user/${localStorage.getItem('uid')}/reset_password`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        },
+                        body: JSON.stringify({
+                            new_pwd: newPassword
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        document.getElementById('edit-password-modal').classList.add('hidden');
+                        alert('密码修改成功，请重新登录');
+                        
+                        // 自动退出登录
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('uid');
+                        userInfoSection.classList.add('hidden');
+                        loginSection.classList.remove('hidden');
+                    } else {
+                        alert(data.message || '密码修改失败');
+                    }
+                } catch (error) {
+                    console.error('修改密码错误:', error);
+                    alert('修改密码时发生错误');
+                }
+            });
+
+            // 修改头像功能
+            document.getElementById('edit-avatar').addEventListener('click', () => {
+                document.getElementById('edit-avatar-modal').classList.remove('hidden');
+                document.getElementById('new-avatar').value = '';
+                document.getElementById('avatar-preview').innerHTML = '';
+                
+                // 显示当前头像
+                const currentAvatar = document.querySelector('#user-avatar-container img');
+                if (currentAvatar) {
+                    const preview = document.createElement('img');
+                    preview.src = currentAvatar.src;
+                    preview.style.width = '100%';
+                    preview.style.height = '100%';
+                    preview.style.objectFit = 'cover';
+                    document.getElementById('avatar-preview').appendChild(preview);
+                }
+            });
+
+            document.getElementById('cancel-avatar').addEventListener('click', () => {
+                document.getElementById('edit-avatar-modal').classList.add('hidden');
+            });
+
+            // 预览上传的头像
+            document.getElementById('new-avatar').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('请选择图片文件');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatar-preview');
+                    preview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 文件上传按钮点击事件
+            document.querySelector('.file-upload-button').addEventListener('click', function() {
+                document.getElementById('new-avatar').click();
+            });
+
+            // 文件选择变化事件
+            document.getElementById('new-avatar').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const display = document.getElementById('file-upload-display');
+                const nameDisplay = document.getElementById('file-name-display');
+                
+                if (!file) {
+                    display.value = '';
+                    nameDisplay.textContent = '';
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('请选择图片文件');
+                    display.value = '';
+                    nameDisplay.textContent = '';
+                    return;
+                }
+                
+                // 显示文件名
+                display.value = '已选择文件';
+                nameDisplay.textContent = `文件名: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                
+                // 预览图片
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatar-preview');
+                    preview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 拖放功能
+            const uploadWrapper = document.querySelector('.file-upload-wrapper');
+            const uploadInput = document.getElementById('file-upload-display');
+
+            uploadWrapper.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadWrapper.style.border = '2px dashed #0366d6';
+                uploadWrapper.style.backgroundColor = '#f0f7ff';
+            });
+
+            uploadWrapper.addEventListener('dragleave', () => {
+                uploadWrapper.style.border = '1px solid #e1e4e8';
+                uploadWrapper.style.backgroundColor = '#f6f8fa';
+            });
+
+            uploadWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadWrapper.style.border = '1px solid #e1e4e8';
+                uploadWrapper.style.backgroundColor = '#f6f8fa';
+                
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+                
+                if (!file.type.startsWith('image/')) {
+                    alert('请拖放图片文件');
+                    return;
+                }
+                
+                // 模拟文件选择
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('new-avatar').files = dataTransfer.files;
+                
+                // 触发change事件
+                const event = new Event('change');
+                document.getElementById('new-avatar').dispatchEvent(event);
+            });
+
+            // 确认上传头像
+            document.getElementById('confirm-avatar').addEventListener('click', async () => {
+                const fileInput = document.getElementById('new-avatar');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    alert('请选择头像文件');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const response = await fetch(`/api/user/${localStorage.getItem('uid')}/upload_avatar`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        },
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        document.getElementById('edit-avatar-modal').classList.add('hidden');
+                        alert('头像修改成功');
+                        
+                        // 刷新头像显示
+                        const uid = localStorage.getItem('uid');
+                        const avatarContainer = document.getElementById('user-avatar-container');
+                        avatarContainer.innerHTML = `<img src="${CelesteNet_URL}/api/avatar?uid=${uid}&t=${Date.now()}" alt="用户头像">`;
+                    } else {
+                        alert(data.message || '头像修改失败');
+                    }
+                } catch (error) {
+                    console.error('修改头像错误:', error);
+                    alert('修改头像时发生错误');
+                }
+            });
+        });
         
         // 标签页切换
         tabs.forEach(tab => {
@@ -675,6 +1288,11 @@
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
                     }
                 });
+
+                if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
+                }
                 
                 const data = await response.json();
                 
@@ -683,7 +1301,8 @@
                     document.getElementById('user-name-display').textContent = data.data.name;
                     document.getElementById('user-id-display').textContent = data.data.uid;
 
-                    document.getElementById('user-key').textContent = data.data.key
+                    // document.getElementById('user-key').textContent = data.data.key
+                    currentKey = data.data.key;
                     
                     if (data.data.Admin) {
                         document.getElementById('user-admin-status').childElementCount = '<span class="user-admin">管理员</span>';
@@ -694,19 +1313,18 @@
                     document.getElementById('user-email').textContent = data.data.Email || '未设置';
                     
                     // 加载头像
+                    const avatarContainer = document.getElementById('user-avatar-container');
+                    avatarContainer.innerHTML = '';
                     if (data.data.Avatar) {
-                        const avatarContainer = document.getElementById('user-avatar-container');
-                        avatarContainer.innerHTML = `<img src="${CelesteNet_URL}/api/avatar?uid=${uid}" alt="用户头像">`;
+                        const img = document.createElement('img');
+                        img.src = `${CelesteNet_URL}/api/avatar?uid=${uid}&t=${Date.now()}`;
+                        img.alt = '用户头像';
+                        avatarContainer.appendChild(img);
                     }
                 }
             } catch (error) {
                 console.error('加载用户信息错误:', error);
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('uid');
-                userInfoSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
+                handleUnauthorized();
             }
         }
 
@@ -719,6 +1337,11 @@
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
                     }
                 });
+                
+                if (response.status === 401) {
+                    handleUnauthorized();
+                    return;
+                }
                 
                 const data = await response.json();
                 
@@ -745,7 +1368,7 @@
                 }
             } catch (error) {
                 console.error('加载玩家列表错误:', error);
-                playerListContainer.innerHTML = '<div class="player-item">加载玩家列表失败</div>';
+                handleUnauthorized();
             }
         }
 
@@ -791,7 +1414,29 @@
             }
         }
 
-        // 页面加载时初始化
+        // 处理未授权情况
+        function handleUnauthorized() {
+            // 清除本地存储
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('uid');
+            
+            // 切换到登录界面
+            userInfoSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            
+            // 清空登录表单
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            
+            // 显示提示信息
+            alert('会话已过期，请重新登录');
+            
+            // 如果当前显示的是玩家列表，则重新加载
+            if (document.querySelector('.tab.active').getAttribute('data-tab') === 'player-list') {
+                loadPlayerList();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // 加载服务器信息
             loadServerInfo();
@@ -841,6 +1486,53 @@
                 if (document.querySelector('.tab.active').getAttribute('data-tab') === 'player-list') {
                     loadPlayerList();
                 }
+            }
+        });
+
+        // 添加显示/隐藏密钥功能
+        let keyVisible = false;
+        let currentKey = '';
+
+        document.getElementById('toggle-key').addEventListener('click', () => {
+            keyVisible = !keyVisible;
+            document.getElementById('user-key').textContent = keyVisible ? currentKey : '****************';
+            const toggleBtn = document.getElementById('toggle-key');
+            const eyeIcon = toggleBtn.querySelector('.icon-eye');
+            const eyeOffIcon = toggleBtn.querySelector('.icon-eye-off');
+            
+            if (keyVisible) {
+                toggleBtn.title = '隐藏密钥';
+            } else {
+                toggleBtn.title = '显示密钥';
+            }
+        });
+
+        // 添加复制密钥功能
+        document.getElementById('copy-key').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentKey);
+            alert('密钥已复制到剪贴板');
+        });
+
+        // 添加刷新密钥功能
+        document.getElementById('refresh-key').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/api/user/${localStorage.getItem('uid')}/reset_key`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    currentKey = data.data.key;
+                    if (keyVisible) {
+                        document.getElementById('user-key').textContent = currentKey;
+                    }
+                    alert('密钥已重置');
+                }
+            } catch (error) {
+                console.error('重置密钥错误:', error);
+                alert('重置密钥失败');
             }
         });
 

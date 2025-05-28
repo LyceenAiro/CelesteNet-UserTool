@@ -33,6 +33,17 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
+def super_admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        SuperAdminList = []
+        current_uid = get_jwt_identity()
+        if not is_CheckAdmin(current_uid) and current_uid in SuperAdminList:
+            return jsonify({"status": "error", "message": "需要超级管理员权限"}), 403
+        return fn(*args, **kwargs)
+    return wrapper
+
 # 登录接口
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -203,7 +214,7 @@ def grant_admin(uid):
 # 重置密钥
 @app.route('/api/user/<uid>/reset_key', methods=['PUT'])
 @jwt_required()
-def reset_key():
+def reset_key(uid):
     """
     输入类型:
     uid         想要授权管理员的用户
@@ -217,7 +228,8 @@ def reset_key():
     key         重置后的最新密钥
     """
     current_uid = get_jwt_identity()
-    key = ReGetKey(current_uid)
+    if uid == current_uid:
+        key = ReGetKey(current_uid)
     return jsonify({
         "status": "success",
         "data": {
@@ -304,6 +316,29 @@ def change_name(uid):
         return jsonify({"status": "error", "message": "修改昵称失败"}), 500
     return jsonify({"status": "success"})
 
+# 注销用户
+@app.route('/api/user/<uid>/cancel_user', methods=['POST'])
+@jwt_required()
+def cancel_user(uid):
+    """
+    输入类型:
+    <uid>       在链接中插入: 用户名
+
+    会完全删除所有的用户信息
+        
+    返回字段:
+    success     注销成功
+    error       注销失败
+    message     注销失败原因, 只有在注销失败后携带
+    """
+    current_uid = get_jwt_identity()
+    if uid != current_uid:
+        return jsonify({"status": "error", "message": "没有权限注销其他的用户"}), 403
+    success = RemoveUser(uid)
+    if not success:
+        return jsonify({"status": "error", "message": "用户注销失败"}), 500
+    return jsonify({"status": "success"})
+
 # 查询被Ban的用户
 @app.route('/api/baninfo', methods=['GET'])
 def get_ban_info():
@@ -388,3 +423,49 @@ def get_players_list():
                 i_dict["Avatar"] = i["Avatar"]
             result_info.append(i_dict)
     return jsonify({"status": "success", "data": result_info})
+
+# 头像修改
+@app.route('/api/user/<uid>/upload_avatar', methods=['POST'])
+@jwt_required()
+def upload_avatar(uid):
+    """
+    输入类型:
+    <uid>       在链接中插入: 用户名
+    file        上传的头像文件(图片)
+
+    用户上传头像文件，会自动保存到GlobalAvatar目录并转换为png格式
+    然后调用InsertAvatar函数更新用户头像
+    
+    返回字段:
+    success     上传成功
+    error       上传失败
+    message     失败原因
+    """
+    current_uid = get_jwt_identity()
+    if uid != current_uid:
+        return jsonify({"status": "error", "message": "无权修改该用户的头像"}), 403
+    
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "未上传文件"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "未选择文件"}), 400
+    
+    if not file.content_type.startswith('image/'):
+        return jsonify({"status": "error", "message": "仅支持图片文件"}), 400
+    
+    try:
+        os.makedirs(f"{UserDataPath}/GlobalAvatar", exist_ok=True)
+
+        filename = f"{uid}.png"
+        filepath = os.path.join(f"{UserDataPath}/GlobalAvatar", filename)
+        file.save(filepath)
+
+        if InsertAvatar(uid):
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "error", "message": "更新头像失败"}), 500
+            
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
