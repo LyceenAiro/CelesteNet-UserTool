@@ -164,7 +164,7 @@
         }
         
         .ban-info-item strong {
-            color: #d73a49;
+            color: #ff5364;
         }
         
         .login-form, .register-form {
@@ -251,10 +251,21 @@
             color: #586069;
         }
         
+        .user-superadmin {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: #3184d8;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+
         .user-admin {
             display: inline-block;
             padding: 2px 6px;
-            background-color: #d73a49;
+            background-color: #ff5364;
             color: white;
             border-radius: 3px;
             font-size: 12px;
@@ -309,7 +320,7 @@
         }
         
         .error {
-            background-color: #d73a49;
+            background-color: #ff5364;
         }
         
         .result-message {
@@ -569,6 +580,7 @@
                         <div class="ban-info" id="ban-info-container">
                             <!-- 封禁信息将在这里动态加载 -->
                         </div>
+                        <div class="ban-info-buttondiv" id="ban-info-buttondiv"></div>
                     </div>
                 </div>
             </div>
@@ -747,9 +759,24 @@
             </div>
         </div>
     </div>
+
+    <!-- 封禁用户-->
+    <div id="ban-user-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>封禁设置</h3>
+            <input type="number" id="ban-minutes" class="modal-input" placeholder="设置天数" min="0">
+            <input type="number" id="ban-days" class="modal-input" placeholder="设置分钟" min="0">
+            <input type="text" id="ban-reason" class="modal-input" placeholder="封禁原因">
+            <div class="modal-actions">
+                <button id="confirm-ban" class="form-button" style="background-color: #ff5364;">确认封禁</button>
+                <button id="cancel-ban" class="form-button secondary-button">取消</button>
+            </div>
+        </div>
+    </div>
     <script>
         // 服务器地址配置
         const SERVER_URL = '';
+        let currentBanUser = '';
         let CelesteNet_URL
         
         // DOM元素
@@ -1077,6 +1104,41 @@
                     alert('修改头像时发生错误');
                 }
             });
+
+            
+
+            document.getElementById('cancel-ban').addEventListener('click', () => {
+                document.getElementById('ban-user-modal').classList.add('hidden');
+            });
+
+            document.getElementById('confirm-ban').addEventListener('click', async () => {
+                let days = parseInt(document.getElementById('ban-days').value);
+                let minutes = parseInt(document.getElementById('ban-minutes').value);
+                const reason = document.getElementById('ban-reason').value;
+                
+                if (isNaN(days)) { days = 0 }
+                if (isNaN(minutes)) { minutes = 0 }
+                
+                try {
+                    const response = await fetch(`/api/ban?uid=${currentBanUser}&days=${days}&minutes=${minutes}&reason=${encodeURIComponent(reason)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        document.getElementById('ban-user-modal').classList.add('hidden');
+                        alert('封禁成功');
+                        document.getElementById('ban-search-button').click(); // 刷新查询结果
+                    } else {
+                        alert(data.message || '封禁失败');
+                    }
+                } catch (error) {
+                    console.error('封禁错误:', error);
+                    alert('封禁过程中发生错误');
+                }
+            });
         });
         
         // 标签页切换
@@ -1253,9 +1315,16 @@
                 const data = await response.json();
                 
                 const banInfoContainer = document.getElementById('ban-info-container');
+                const banInfoButtonDiv = document.getElementById('ban-info-buttondiv');
+                if (data.status == "error") {
+                    banInfoContainer.innerHTML = `<div class="ban-info-item">${data.message}</div>`;
+                    return
+                }
                 
-                if (data.data) {
-                    banInfoContainer.innerHTML = `
+                let banInfoHTML = '';
+                let banButtonHTML = '';
+                if (data.data.Reason) {
+                    banInfoHTML = `
                         <div class="ban-info-item">
                             <strong>封禁原因:</strong> ${data.data.Reason || '无'}
                         </div>
@@ -1267,11 +1336,128 @@
                         </div>
                     `;
                 } else {
-                    banInfoContainer.innerHTML = '<div class="ban-info-item">该用户没有封禁记录</div>';
+                    banInfoHTML = '<div class="ban-info-item">该用户没有封禁记录</div>';
+                }
+                
+                // 检查当前用户是否是管理员
+                const currentUserResponse = await fetch(`/api/user/${localStorage.getItem('uid')}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                const currentUserData = await currentUserResponse.json();
+                
+                if (currentUserData.status === 'success' && (currentUserData.data.Admin || currentUserData.data.SuperAdmin)) {
+                    banButtonHTML += '<div class="ban-search" style="margin-top: 15px; display: flex; gap: 10px;">';
+                    
+                    // 封禁按钮（管理员可见）
+                    banButtonHTML += `<button class="form-button" id="ban-button" style="background-color: #ff5364;">封禁用户</button>`;
+                    
+                    // 解封按钮（超级管理员可见）
+                    if (currentUserData.data.SuperAdmin) {
+                        banButtonHTML += `<button class="form-button" id="unban-button" style="background-color: #0366d6;">删除记录</button>`;
+                        
+                        // 管理员权限按钮（超级管理员可见）
+                        if (data.data.Admin) {
+                            banButtonHTML += `<button class="form-button" id="remove-admin-button" style="background-color: #ff8c00;">收回管理员</button>`;
+                        } else {
+                            banButtonHTML += `<button class="form-button" id="add-admin-button" style="background-color: #2ea44f;">设为管理员</button>`;
+                        }
+                    }
+                    
+                    banButtonHTML += '</div>';
+                }
+                
+                banInfoContainer.innerHTML = banInfoHTML;
+                banInfoButtonDiv.innerHTML = banButtonHTML;
+                
+                // 添加按钮事件监听
+                if (document.getElementById('ban-button')) {
+                    document.getElementById('ban-button').addEventListener('click', () => {
+                        document.getElementById('ban-user-modal').classList.remove('hidden');
+                        document.getElementById('ban-days').value = '';
+                        document.getElementById('ban-reason').value = '';
+                        currentBanUser = username;
+                    });
+                }
+                
+                if (document.getElementById('unban-button')) {
+                    document.getElementById('unban-button').addEventListener('click', async () => {
+                        if (confirm(`确定要将 ${username} 的封禁记录移除吗？`)) {
+                            try {
+                                const response = await fetch(`/api/deban?uid=${username}`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                                    }
+                                });
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    alert('封禁记录移除成功');
+                                    banSearchButton.click(); // 刷新查询结果
+                                } else {
+                                    alert(data.message || '移除失败');
+                                }
+                            } catch (error) {
+                                console.error('移除错误:', error);
+                                alert('移除过程中发生错误');
+                            }
+                        }
+                    });
+                }
+                
+                if (document.getElementById('remove-admin-button')) {
+                    document.getElementById('remove-admin-button').addEventListener('click', async () => {
+                        if (confirm(`确定要回收用户 ${username} 的管理员权限吗？`)) {
+                            try {
+                                const response = await fetch(`/api/deop?uid=${username}`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                                    }
+                                });
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    alert('管理员权限收回成功');
+                                    banSearchButton.click(); // 刷新查询结果
+                                } else {
+                                    alert(data.message || '管理员收回权限失败');
+                                }
+                            } catch (error) {
+                                console.error('收回管理员错误:', error);
+                                alert('收回管理员权限过程中发生错误');
+                            }
+                        }
+                    });
+                }
+                
+                if (document.getElementById('add-admin-button')) {
+                    document.getElementById('add-admin-button').addEventListener('click', async () => {
+                        if (confirm(`确定要授予用户 ${username} 管理员权限吗？`)) {
+                            try {
+                                const response = await fetch(`/api/op?uid=${username}`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                                    }
+                                });
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    alert('授予管理员权限成功');
+                                    banSearchButton.click(); // 刷新查询结果
+                                } else {
+                                    alert(data.message || '授予管理员权限失败');
+                                }
+                            } catch (error) {
+                                console.error('授予管理员错误:', error);
+                                alert('授予管理员权限过程中发生错误');
+                            }
+                        }
+                    });
                 }
             } catch (error) {
-                console.error('封禁查询错误:', error);
-                alert('查询封禁信息时发生错误');
+                console.error('查询错误:', error);
+                alert('查询信息时发生错误');
             }
         });
 
@@ -1301,13 +1487,16 @@
                     document.getElementById('user-name-display').textContent = data.data.name;
                     document.getElementById('user-id-display').textContent = data.data.uid;
 
-                    // document.getElementById('user-key').textContent = data.data.key
                     currentKey = data.data.key;
+
+                    console.log(data)
                     
-                    if (data.data.Admin) {
-                        document.getElementById('user-admin-status').childElementCount = '<span class="user-admin">管理员</span>';
+                    if (data.data.SuperAdmin) {
+                        document.getElementById('user-admin-status').innerHTML = '<span class="user-superadmin">超级管理员</span>';
+                    } else if (data.data.Admin) {
+                        document.getElementById('user-admin-status').innerHTML = '<span class="user-admin">管理员</span>';
                     } else {
-                        document.getElementById('user-admin-status').childElementCount = '<span class="user-user">用户</span>';
+                        document.getElementById('user-admin-status').innerHTML = '<span class="user-user">用户</span>';
                     }
                     
                     document.getElementById('user-email').textContent = data.data.Email || '未设置';

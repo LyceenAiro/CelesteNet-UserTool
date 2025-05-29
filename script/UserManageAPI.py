@@ -100,6 +100,27 @@ def GiveOP(uid: str) -> bool:
     except Exception as e:
         _log._ERROR(f"[GiveOP]x {uid} 赋予管理员失败: {e}")
         return False
+    
+# 赋予玩家超级管理员
+def GiveSuperOP(uid: str) -> bool:
+    config_path = f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml"
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f) or {}
+        if 'admin' not in data['Tags']:
+            data['Tags'].append('admin')
+            with open(config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+        if 'superadmin' not in data['Tags']:
+            data['Tags'].append('superadmin')
+            with open(config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+        InsertBasicInfo(uid)
+        _log._INFO(f"[GiveSuperOP]√ {uid} 赋予超级管理员成功")
+        return True
+    except Exception as e:
+        _log._ERROR(f"[GiveSuperOP]x {uid} 赋予超级管理员失败: {e}")
+        return False
 
 # 移除玩家管理员
 def DeOP(uid: str) -> bool:
@@ -111,11 +132,34 @@ def DeOP(uid: str) -> bool:
             data['Tags'].remove('admin')
             with open(config_path, 'w', encoding='utf-8') as f:
                 yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+        else:
+            _log._INFO(f"[DeOP]x {uid} 不是管理员")
+            return False
         InsertBasicInfo(uid)
         _log._INFO(f"[DeOP]√ {uid} 回收管理员成功")
         return True    
     except Exception as e:
         _log._ERROR(f"[DeOP]x {uid} 回收管理员失败: {e}")
+        return False
+    
+# 移除玩家超级管理员
+def DeSuperOP(uid: str) -> bool:
+    config_path = f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml"
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f) or {}
+        if 'Tags' in data and 'superadmin' in data['Tags']:
+            data['Tags'].remove('superadmin')
+            with open(config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+        else:
+            _log._INFO(f"[DeSuperOP]x {uid} 不是超级管理员")
+            return False
+        InsertBasicInfo(uid)
+        _log._INFO(f"[DeSuperOP]√ {uid} 回收超级管理员成功")
+        return True    
+    except Exception as e:
+        _log._ERROR(f"[DeSuperOP]x {uid} 回收超级管理员失败: {e}")
         return False
     
 # 完全注销用户
@@ -138,6 +182,8 @@ def RemoveUser(uid: str) -> bool:
 def GetBanInfo(uid: str) -> dict:
     data = sql.GetBanData(uid)
     _log._INFO(f"[GetBanInfo]uid: {uid} BanInfo: {data}")
+    if data == None:
+        data = {}
     return data
 
 # Ban一名玩家
@@ -161,6 +207,7 @@ def GetUserInfo(index: str) -> dict:
         "name": None,
         "Avatar": False,
         "Admin": False,
+        "SuperAdmin": False,
         "Email": None
     }
     if len(index) == 16 and all(i in '0123456789abcdefABCDEF' for i in index):
@@ -184,6 +231,8 @@ def GetUserInfo(index: str) -> dict:
     result_dict["name"] = data["Name"]
     if "admin" in data["Tags"]:
         result_dict["Admin"] = True
+    if "superadmin" in data["Tags"]:
+        result_dict["SuperAdmin"] = True
     if os.path.exists(os.path.join(f"{UserDataPath}/User/{result_dict['uid']}", "avatar.png")):
         result_dict["Avatar"] = True
     _log._INFO(f"[GetUserInfo]{result_dict}")
@@ -193,5 +242,12 @@ def is_CheckAdmin(uid: str) -> bool:
     with open(f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f) or {}
     if "admin" in data["Tags"]:
+        return True
+    return False
+
+def is_CheckSuperAdmin(uid: str) -> bool:
+    with open(f"{UserDataPath}/User/{uid}/BasicUserInfo.yaml", 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+    if "superadmin" in data["Tags"]:
         return True
     return False

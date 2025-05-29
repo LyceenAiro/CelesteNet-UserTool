@@ -347,9 +347,10 @@ class SqliteUserData:
             with self.Open() as conn:
                 cursor = conn.cursor()
                 table = self.GetDataTable("BanInfo", create=True)
+                print(table)
                 cursor.execute(f"SELECT uid FROM [{table}] WHERE uid = ? LIMIT 1", (uid,))
                 row = cursor.fetchone()
-                if not row or row[0]:
+                if not row:
                     return False
                 conn.execute(f"DELETE FROM [{table}] WHERE uid = ?", (uid,))
                 conn.commit()

@@ -37,9 +37,8 @@ def super_admin_required(fn):
     @wraps(fn)
     @jwt_required()
     def wrapper(*args, **kwargs):
-        SuperAdminList = []
         current_uid = get_jwt_identity()
-        if not is_CheckAdmin(current_uid) and current_uid in SuperAdminList:
+        if not is_CheckSuperAdmin(current_uid) or not is_CheckAdmin(current_uid):
             return jsonify({"status": "error", "message": "需要超级管理员权限"}), 403
         return fn(*args, **kwargs)
     return wrapper
@@ -191,8 +190,8 @@ def get_user_info(uid):
 
 # 授权管理员
 @app.route('/api/op', methods=['GET'])
-@admin_required
-def grant_admin(uid):
+@super_admin_required
+def grant_admin():
     """
     输入类型:
     uid         想要授权管理员的用户
@@ -201,14 +200,35 @@ def grant_admin(uid):
     GiveOP只会返回bool类型, 用于判断是否成功授权管理员
 
     返回字段:
-    success     修改成功
-    error       修改失败
-    message     修改失败原因, 只有在修改失败后携带
+    success     授权成功
+    error       授权失败
+    message     授权失败原因, 只有在授权失败后携带
     """
-    uid = request.json.get('uid')
+    uid = request.args.get('uid')
     success = GiveOP(uid)
     if not success:
         return jsonify({"status": "error", "message": "授予管理员权限失败"}), 500
+    return jsonify({"status": "success"})
+
+# 移除管理员
+@app.route('/api/deop', methods=['GET'])
+@super_admin_required
+def remove_admin():
+    """
+    输入类型:
+    uid         想要移除管理员的用户
+
+    将管理员用户移除管理员
+
+    返回字段:
+    success     移除成功
+    error       移除失败
+    message     移除失败原因, 只有在移除失败后携带
+    """
+    uid = request.args.get('uid')
+    success = DeOP(uid)
+    if not success:
+        return jsonify({"status": "error", "message": "回收管理员权限失败"}), 500
     return jsonify({"status": "success"})
 
 # 重置密钥
@@ -244,7 +264,10 @@ def reset_key(uid):
 def ban_user():
     """
     输入类型:
-    uid        想要封禁的用户
+    uid         想要封禁的用户
+    minutes     封禁分钟数
+    days        封禁天数
+    reason      封禁原因 (可选)
 
     如果BanUser为空则返回False, 最后输出的data自动转换为None
     如果BanUser不为空则返回下面格式
@@ -264,14 +287,17 @@ def ban_user():
     To          结束封禁时间, 如果为None为永久封禁
     """
     uid = request.args.get('uid')
-    info = BanUser(uid)
+    minutes = int(request.args.get('minutes', 0))
+    days = int(request.args.get('days', 0))
+    reason = request.args.get('reason', '')
+    info = BanUser(uid, minutes, days, reason)
     if not info:
         info = None
     return jsonify({"status": "success", "data": info})
 
 # 解禁用户
 @app.route('/api/deban', methods=['GET'])
-@admin_required
+@super_admin_required
 def deban_user():
     """
     输入类型:
@@ -358,9 +384,15 @@ def get_ban_info():
     Reason      封禁内容(封禁原因)
     StartTime   开始封禁时间
     EndTime     结束封禁时间, 如果为None为永久封禁
+    Admin       返回用户是否为管理员
+    message     如果没有查询到相关用户, 则会返回error且携带message
     """
     uid = request.args.get('uid')
+    user = GetUserInfo(uid)
+    if user == None:
+        return jsonify({"status": "error", "message": "没有该用户的信息"})
     info = GetBanInfo(uid)
+    info["Admin"] = user["Admin"]
     return jsonify({"status": "success", "data": info})
 
 # 获取服务器信息
