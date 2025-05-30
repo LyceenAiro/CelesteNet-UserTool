@@ -4,7 +4,7 @@ import yaml
 from PIL import Image
 
 from script.SqliteModule import SqliteUserData
-from script.WebUserManage import RegisterUser, VerifyUserPassword, UpdateUserPassword
+from script.WebUserManage import RegisterUser
 
 from util.log import _log
 from util.YamlRead import UserDataPath, real, module
@@ -115,12 +115,17 @@ def GiveSuperOP(uid: str) -> bool:
             data['Tags'].append('superadmin')
             with open(config_path, 'w', encoding='utf-8') as f:
                 yaml.dump(data, f, sort_keys=False, allow_unicode=True)
+        else:
+            _log._INFO(f"[GiveSuperOP]√ {uid} 已经是超级管理员")
+            return True
         InsertBasicInfo(uid)
         _log._INFO(f"[GiveSuperOP]√ {uid} 赋予超级管理员成功")
         return True
+    except FileNotFoundError:
+        _log._ERROR(f"[GiveSuperOP]x {uid} 赋予超级管理员失败: 没有找到该用户实例")
     except Exception as e:
         _log._ERROR(f"[GiveSuperOP]x {uid} 赋予超级管理员失败: {e}")
-        return False
+    return False
 
 # 移除玩家管理员
 def DeOP(uid: str) -> bool:

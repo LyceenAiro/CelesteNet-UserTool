@@ -1,16 +1,20 @@
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, render_template
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
-    get_jwt_identity, verify_jwt_in_request,
-    get_jwt
+    get_jwt_identity, get_jwt
 )
-from werkzeug.utils import secure_filename
 import os
 from functools import wraps
-from script.UserManageAPI import *
+from script.UserManageAPI import (sql,
+    BanUser, ChangeName, CreateUserData, DeBan,
+    DeOP, GetBanInfo, GetUserInfo, GiveOP,
+    InsertAvatar, ReGetKey, RemoveUser,
+    is_CheckAdmin, is_CheckSuperAdmin
+)
 from script.NetApiFormat import *
 from datetime import timedelta
-from util.YamlRead import CelesteNetApi, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
+from script.WebUserManage import UpdateUserPassword, VerifyUserPassword
+from util.YamlRead import CelesteNetApi, UserDataPath, WebTitle, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
 
 app = Flask(__name__, template_folder='html')
 
@@ -91,9 +95,12 @@ def logout():
     return jsonify({"status": "success"})
 
 # 前端重定向API
-@app.route('/api/celestenet_url', methods=['GET'])
-def getCelesteNetAPI():
-    return jsonify({"url": f"http://{CelesteNetApi}".replace("/api", "")})
+@app.route('/api/websetting', methods=['GET'])
+def WebSetting():
+    return jsonify({
+            "celestenet_url": f"http://{CelesteNetApi}".replace("/api", ""),
+            "webtitle": WebTitle
+        })
 
 # 用户注册
 @app.route('/api/register', methods=['POST'])
@@ -287,6 +294,11 @@ def ban_user():
     To          结束封禁时间, 如果为None为永久封禁
     """
     uid = request.args.get('uid')
+    try:
+        if is_CheckAdmin(uid):
+            return jsonify({"status": "error", "message": "管理员无法封禁"})
+    except FileNotFoundError:
+        return jsonify({"status": "error", "message": "没有搜索到该用户信息"})
     minutes = int(request.args.get('minutes', 0))
     days = int(request.args.get('days', 0))
     reason = request.args.get('reason', '')

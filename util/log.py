@@ -3,8 +3,10 @@ from datetime import datetime
 
 class init_log:
     def __init__(self):
-        if not path.exists("CNUTlog"):
-            makedirs("CNUTlog")
+        if not path.exists("CNUTlog/web"):
+            makedirs("CNUTlog/web")
+        if not path.exists("CNUTlog/core"):
+            makedirs("CNUTlog/core")
         self.max_file_size = 32 * 1024 * 1024 # 32MB
         self.level = 3
         self.path = None
@@ -12,7 +14,7 @@ class init_log:
 
     def get_path(self):
         # 获取日志文件新地址
-        file_list = listdir("CNUTlog")
+        file_list = listdir("CNUTlog/core")
         date = datetime.now().strftime('%y_%m_%d_')
         prefix = f"log_{date}"
 

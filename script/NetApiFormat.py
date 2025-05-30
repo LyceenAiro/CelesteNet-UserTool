@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from util.YamlRead import CelesteNetApi
 from util.log import _log
 import requests

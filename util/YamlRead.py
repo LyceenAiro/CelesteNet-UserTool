@@ -7,8 +7,12 @@ DEFAULT_CONFIG = {
     'real': 'Celeste.Mod',
     'module': 'CelesteNet.Server',
     'CelesteNetApi': 'localhost:17232/api',
+    'WebTitle': 'CelesteNetCN',
+    'WebHost': '0.0.0.0',
+    'WebPort': '17238',
     'JWT_SECRET_KEY': 'abcdefgh12345678',
-    'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': 60
+    'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': 60,
+    'SuperAdmin': None
 }
 
 _config: Dict[str, Any] = {}
@@ -44,5 +48,9 @@ UserDataPath = get_config('UserDataPath')
 real = get_config('real')
 module = get_config('module')
 CelesteNetApi = get_config('CelesteNetApi')
+WebTitle = get_config('WebTitle')
+WebHost = get_config('WebHost')
+WebPort = get_config('WebPort')
 JWT_SECRET_KEY = get_config('JWT_SECRET_KEY')
 JWT_ACCESS_TOKEN_EXPIRES_MINUTES = int(get_config('JWT_ACCESS_TOKEN_EXPIRES_MINUTES'))
+SuperAdmin = get_config('SuperAdmin')

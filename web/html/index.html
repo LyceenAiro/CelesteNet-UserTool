@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CelesteNetCN</title>
+    <title>UserTool</title>
     <style>
         :root {
             --blue-bg: #ffffff;
@@ -109,6 +109,28 @@
             padding: 8px;
             background-color: #f6f8fa;
             border-radius: 6px;
+        }
+
+        .player-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #24292e;
+            letter-spacing: 0.2px;
+            transition: all 0.2s ease;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .player-item:hover .player-name {
+            color: #0366d6;
+            transform: translateX(2px);
+        }
+
+        .player-avatar {
+            transition: all 0.2s ease;
+        }
+
+        .player-item:hover .player-avatar {
+            transform: scale(1.05);
         }
         
         .player-avatar {
@@ -777,7 +799,7 @@
         // 服务器地址配置
         const SERVER_URL = '';
         let currentBanUser = '';
-        let CelesteNet_URL
+        let CelesteNet_URL = '';
         
         // DOM元素
         const tabs = document.querySelectorAll('.tab');
@@ -1534,8 +1556,6 @@
                 
                 const data = await response.json();
                 
-                console.info(data);
-                
                 if (data.status === 'success') {
                     if (data.data && data.data.length > 0) {
                         playerListContainer.innerHTML = '';
@@ -1547,7 +1567,7 @@
                                 <div class="player-avatar">
                                     <img src="${CelesteNet_URL}${player.Avatar}" alt="${player.Name}的头像">
                                 </div>
-                                <div>${player.Name}</div>
+                                <div class="player-name">${player.Name}</div>
                             `;
                             playerListContainer.appendChild(playerItem);
                         });
@@ -1726,13 +1746,14 @@
         });
 
         // 重定向CelesteAPI
-        async function loadCelesteAPI() {
-            const response = await fetch(`/api/celestenet_url`);
+        async function loadwebsetting() {
+            const response = await fetch(`/api/websetting`);
             const data = await response.json();
-            CelesteNet_URL = data.url
+            document.title = data.webtitle;
+            CelesteNet_URL = data.celestenet_url;
         }
         
-        loadCelesteAPI()
+        loadwebsetting()
     </script>
 </body>
 </html>
