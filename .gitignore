@@ -9,6 +9,7 @@ upx*
 main.dist
 main.onefile-build
 main.build
+*.spec
 
 # 调试文件
 *.yaml
@@ -17,3 +18,4 @@ main.build
 ~*
 test*
 *.bak
+pack_app.py
