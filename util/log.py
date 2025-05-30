@@ -16,7 +16,7 @@ class init_log:
         # 获取日志文件新地址
         file_list = listdir("CNUTlog/core")
         date = datetime.now().strftime('%y_%m_%d_')
-        prefix = f"log_{date}"
+        prefix = f"core/log_{date}"
 
         suffixes = []
         for filename in file_list:
