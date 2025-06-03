@@ -16,6 +16,7 @@ main.build
 /CNUTlog
 /*.log
 ~*
+*.ico
 test*
 *.bak
 pack_app.py

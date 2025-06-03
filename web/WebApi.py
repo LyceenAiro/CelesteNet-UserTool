@@ -14,7 +14,11 @@ from script.UserManageAPI import (sql,
 from script.NetApiFormat import *
 from datetime import timedelta
 from script.WebUserManage import UpdateUserPassword, VerifyUserPassword
-from util.YamlRead import CelesteNetApi, UserDataPath, WebTitle, JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
+from util.YamlRead import (
+    CelesteNetWebRedirect, 
+    UserDataPath, WebTitle,
+    JWT_SECRET_KEY, JWT_ACCESS_TOKEN_EXPIRES_MINUTES
+)
 
 app = Flask(__name__, template_folder='html')
 
@@ -98,7 +102,7 @@ def logout():
 @app.route('/api/websetting', methods=['GET'])
 def WebSetting():
     return jsonify({
-            "celestenet_url": f"http://{CelesteNetApi}".replace("/api", ""),
+            "celestenet_url": f"http://{CelesteNetWebRedirect}",
             "webtitle": WebTitle
         })
 

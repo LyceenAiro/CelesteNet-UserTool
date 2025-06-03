@@ -7,6 +7,7 @@ DEFAULT_CONFIG = {
     'real': 'Celeste.Mod',
     'module': 'CelesteNet.Server',
     'CelesteNetApi': 'localhost:17232/api',
+    'CelesteNetWebRedirect': 'localhost:17232',
     'WebTitle': 'CelesteNetCN',
     'WebHost': '0.0.0.0',
     'WebPort': '17238',
@@ -48,6 +49,7 @@ UserDataPath = get_config('UserDataPath')
 real = get_config('real')
 module = get_config('module')
 CelesteNetApi = get_config('CelesteNetApi')
+CelesteNetWebRedirect = get_config('CelesteNetWebRedirect')
 WebTitle = get_config('WebTitle')
 WebHost = get_config('WebHost')
 WebPort = get_config('WebPort')
