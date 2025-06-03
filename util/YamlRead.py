@@ -1,6 +1,7 @@
 import yaml
 import os
 from typing import Dict, Any
+from util.log import _log
 
 DEFAULT_CONFIG = {
     'UserDataPath': '/serverpath/UserData/',
@@ -20,8 +21,10 @@ DEFAULT_CONFIG = {
 _config: Dict[str, Any] = {}
 
 def init_config(config_path: str = 'config.yaml') -> None:
+    _log._INFO("[YamlRead]read_config")
     global _config
     if not os.path.exists(config_path):
+        _log._INFO("[YamlRead]init_config")
         _config = DEFAULT_CONFIG.copy()
         save_config(config_path)
     else:
@@ -38,6 +41,7 @@ def init_config(config_path: str = 'config.yaml') -> None:
             save_config(config_path)
 
 def save_config(config_path: str = 'config.yaml') -> None:
+    _log._INFO("[YamlRead]save_config")
     with open(config_path, 'w', encoding='utf-8') as f:
         yaml.dump(_config, f, sort_keys=False, allow_unicode=True)
 

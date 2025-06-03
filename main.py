@@ -2,13 +2,10 @@ from web.WebApi import app
 from script.UserManageAPI import GiveSuperOP, DeSuperOP
 from util.YamlRead import WebHost, WebPort, SuperAdmin, RemoveSuperAdmin, CelesteNetWebRedirect
 from util.log import _log
+from util.app_data import app_data
 from waitress import serve
 from flask import request
 import logging
-
-from flask import request
-import logging
-from waitress import serve
 
 logging.basicConfig(
     filename='CNUTlog/web/access.log',
@@ -29,6 +26,7 @@ def log_request(response):
     return response
 
 if __name__ == '__main__':
+    _log._INFO(f"[Version]CelesteNet-UserTool v{app_data.version}")
     if RemoveSuperAdmin != None:
         DeSuperOP(RemoveSuperAdmin)
     if SuperAdmin != None:
