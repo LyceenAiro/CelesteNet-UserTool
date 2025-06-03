@@ -216,6 +216,9 @@ def grant_admin():
     message     授权失败原因, 只有在授权失败后携带
     """
     uid = request.args.get('uid')
+    current_uid = get_jwt_identity()
+    if uid == current_uid:
+        return jsonify({"status": "error", "message": "你已经是超管, 不要尝试赋予自己管理员权限"}), 500
     success = GiveOP(uid)
     if not success:
         return jsonify({"status": "error", "message": "授予管理员权限失败"}), 500
@@ -237,6 +240,9 @@ def remove_admin():
     message     移除失败原因, 只有在移除失败后携带
     """
     uid = request.args.get('uid')
+    current_uid = get_jwt_identity()
+    if uid == current_uid:
+        return jsonify({"status": "error", "message": "不要尝试回收自己的管理员权限"}), 500
     success = DeOP(uid)
     if not success:
         return jsonify({"status": "error", "message": "回收管理员权限失败"}), 500
