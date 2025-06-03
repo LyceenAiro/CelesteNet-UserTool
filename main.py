@@ -1,6 +1,6 @@
 from web.WebApi import app
-from script.UserManageAPI import GiveSuperOP
-from util.YamlRead import WebHost, WebPort, SuperAdmin
+from script.UserManageAPI import GiveSuperOP, DeSuperOP
+from util.YamlRead import WebHost, WebPort, SuperAdmin, RemoveSuperAdmin, CelesteNetWebRedirect
 from util.log import _log
 from waitress import serve
 from flask import request
@@ -29,9 +29,12 @@ def log_request(response):
     return response
 
 if __name__ == '__main__':
+    if RemoveSuperAdmin != None:
+        DeSuperOP(RemoveSuperAdmin)
     if SuperAdmin != None:
         GiveSuperOP(SuperAdmin)
-    _log._INFO(f"[waitress]web服务已开启, 请在 {WebHost}:{WebPort} 访问")
+    _log._INFO(f"[waitress]Web服务已开启, 请在 {WebHost}:{WebPort} 访问")
+    _log._INFO(f"[waitress]前端重定向CelesteNetAPI为 {CelesteNetWebRedirect}/api")
     serve(
         app,
         host=WebHost,

@@ -13,7 +13,8 @@ DEFAULT_CONFIG = {
     'WebPort': '17238',
     'JWT_SECRET_KEY': 'abcdefgh12345678',
     'JWT_ACCESS_TOKEN_EXPIRES_MINUTES': 60,
-    'SuperAdmin': None
+    'SuperAdmin': None,
+    'RemoveSuperAdmin': None
 }
 
 _config: Dict[str, Any] = {}
@@ -56,3 +57,4 @@ WebPort = get_config('WebPort')
 JWT_SECRET_KEY = get_config('JWT_SECRET_KEY')
 JWT_ACCESS_TOKEN_EXPIRES_MINUTES = int(get_config('JWT_ACCESS_TOKEN_EXPIRES_MINUTES'))
 SuperAdmin = get_config('SuperAdmin')
+RemoveSuperAdmin = get_config('RemoveSuperAdmin')
