@@ -330,9 +330,11 @@ class SqliteUserData:
             "StartTime": None,
             "EndTime": None
         }
+        print("查询ban")
         data = self.get_data(uid, "BanInfo")
         if data is None:
             return None
+        print(data)
         result_dict["Reason"] = data["Reason"]
         result_dict["StartTime"] = (datetime.fromtimestamp(data["From"].seconds + data["From"].nanoseconds / 1e9) - timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
         if data["To"] is None:
@@ -400,7 +402,7 @@ class SqliteUserData:
         
     def get_data(self, uid: str, name: str) -> Optional[dict]:
         """根据 UID 和表名读取数据"""
-        table = self.GetDataTable(name, create=False)
+        table = self.GetDataTable(name, create=True)
         
         with self.Open() as conn:
             cursor = conn.cursor()
